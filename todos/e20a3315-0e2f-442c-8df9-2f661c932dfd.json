@@ -1,0 +1,34 @@
+{
+    "my-todo": [
+        {
+            "text": "asd",
+            "priority": "1",
+            "date": 1613396337714
+        },
+        {
+            "text": "Eat Pizza",
+            "priority": "2",
+            "date": 1613396382271
+        },
+        {
+            "text": "asdasd",
+            "priority": "4",
+            "date": 1613396744288
+        }
+    ],
+    "completed-todos": [
+        {
+            "text": "asd",
+            "priority": "1",
+            "date": 1613333102362,
+            "dateCompleted": 1613333108824
+        },
+        {
+            "text": "Eat P123145542526",
+            "priority": "2",
+            "date": 1613396382271,
+            "dateCompleted": 1613416672139
+        }
+    ],
+    "id": "e20a3315-0e2f-442c-8df9-2f661c932dfd"
+}

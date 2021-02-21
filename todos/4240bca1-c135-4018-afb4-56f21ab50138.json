@@ -1,0 +1,18 @@
+{
+    "my-todo": [
+        {
+            "text": "Get shredded",
+            "priority": "3",
+            "date": 1613869413218
+        }
+    ],
+    "completed-todos": [
+        {
+            "text": "Eat Pizza",
+            "priority": "5",
+            "date": 1613869400385,
+            "dateCompleted": 1613869419824
+        }
+    ],
+    "id": "4240bca1-c135-4018-afb4-56f21ab50138"
+}

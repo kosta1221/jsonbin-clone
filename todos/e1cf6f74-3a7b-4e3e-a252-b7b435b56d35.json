@@ -1,0 +1,18 @@
+{
+    "my-todo": [
+        {
+            "text": "sdfsdfs",
+            "priority": "1",
+            "date": 1613868246753
+        }
+    ],
+    "completed-todos": [
+        {
+            "text": "Eat lunch right now!!",
+            "priority": "4",
+            "date": 1613868195821,
+            "dateCompleted": 1613868231721
+        }
+    ],
+    "id": "e1cf6f74-3a7b-4e3e-a252-b7b435b56d35"
+}
