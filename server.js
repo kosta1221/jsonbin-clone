@@ -1,6 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const uuid = require("uuid");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -41,7 +42,9 @@ app.get("/b/:id", (req, res) => {
 		fs.readFile(`./todos/${id}.json`, (err, data) => {
 			if (err) {
 				res.status(500).json({ message: "Internal server error", error: err });
-			} else res.send(data);
+			} else {
+				res.send(JSON.parse(data));
+			}
 		});
 	}
 });
@@ -108,3 +111,5 @@ app.delete("/b/:id", (req, res) => {
 app.listen(PORT, () => {
 	console.log(`Server started on port ${PORT}`);
 });
+
+module.exports = { app };
