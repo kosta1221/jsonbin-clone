@@ -36,8 +36,14 @@ app.get("/b", (req, res) => {
 // GET request to /b/{id} returns the details of the object
 app.get("/b/:id", (req, res) => {
 	const { id } = req.params;
+
+	// uuid format is 36 characters long
+	if (id.length !== 36) {
+		res.status(400).json({ message: "Invalid bin id format!" });
+	}
+
 	if (!fs.existsSync(`./todos/${id}.json`)) {
-		res.status(400).json({ message: "Invalid bin id" });
+		res.status(404).json({ message: "Bin not found!" });
 	} else {
 		fs.readFile(`./todos/${id}.json`, (err, data) => {
 			if (err) {
