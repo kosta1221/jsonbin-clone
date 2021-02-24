@@ -7,23 +7,59 @@ const expectedErrorWithId = {
 	message: "Invalid bin id format!",
 };
 const expectedErrorWithBin = { message: "Bin not found!" };
-
-let idOfFileToDelete;
+const bodyOfMockBinToCreate = {
+	"my-todo": [
+		{
+			text: "asd",
+			priority: "1",
+			date: 1613396337714,
+		},
+		{
+			text: "Eat Pizza",
+			priority: "2",
+			date: 1613396382271,
+		},
+		{
+			text: "asdasd",
+			priority: "4",
+			date: 1613396744288,
+		},
+	],
+	"completed-todos": [
+		{
+			text: "asd",
+			priority: "1",
+			date: 1613333102362,
+			dateCompleted: 1613333108824,
+		},
+		{
+			text: "Eat P123145542526",
+			priority: "2",
+			date: 1613396382271,
+			dateCompleted: 1613416672139,
+		},
+	],
+};
 
 describe("Test for GET method", () => {
-	const expectedBin = {
-		id: "3254bd50-ca62-450d-9f23-b5df1e11e88e",
-	};
-
 	it("Should be able to get a bin by id", async () => {
-		const response = await supertest(app).get("/b/3254bd50-ca62-450d-9f23-b5df1e11e88e");
-		// supertest(app).get("/b:id").expect(200);
+		// const mockBin = createMockBin(bodyOfMockBinToCreate);
+		const mockBin = await supertest(app).post("/b").send(bodyOfMockBinToCreate);
+
+		const { id } = mockBin.body;
+		const idString = `${id}`;
+		console.log(idString);
+
+		const response = await supertest(app).get("/b/" + idString);
+
 		// Is the status code 200
 		expect(response.status).toBe(200);
 		console.log(response.body);
 
 		// Is the body equal expectedBin
-		expect(response.body.id).toEqual(expectedBin.id);
+		expect(response.body.id).toEqual(mockBin.body.id);
+		console.log(idString);
+		await supertest(app).delete("/b/" + idString);
 	});
 
 	it("Should return an error message with status code 400 for invalid id", async () => {
@@ -71,8 +107,6 @@ describe("POST route", () => {
 	it("Should post a new bin successfully", async () => {
 		const response = await supertest(app).post("/b").send(binToPost);
 		const { id } = response.body;
-		idOfFileToDelete = `${id}`;
-		console.log(idOfFileToDelete);
 
 		const expectedResponse = {
 			"my-todo": [
@@ -92,10 +126,11 @@ describe("POST route", () => {
 			],
 		};
 		expectedResponse.id = id;
-		console.log(expectedResponse);
 
 		expect(response.status).toBe(201);
 		expect(response.body).toEqual(expectedResponse);
+
+		await supertest(app).delete("/b/" + id);
 	});
 
 	// it("Should return an error message with status code 400 sending blank bins")
@@ -103,7 +138,6 @@ describe("POST route", () => {
 });
 
 describe("PUT route", () => {
-	let idOfFileToDelete = "39dfcac2-a743-4c54-8810-01cc9193988f";
 	const binToPut = {
 		"my-todo": [
 			{
@@ -120,29 +154,34 @@ describe("PUT route", () => {
 				dateCompleted: 1613869401116,
 			},
 		],
-		id: idOfFileToDelete,
 	};
 
-	it("Should update a bin successfully", async () => {
+	it("Should update a bin successfully and should not create a new bin while updating", async () => {
+		const mockBin = await supertest(app).post("/b").send();
+
+		const { id } = mockBin.body;
+		const idStringOfMockbin = `${id}`;
+
+		binToPut.id = idStringOfMockbin;
+
 		const response = await supertest(app)
-			.put("/b/" + idOfFileToDelete)
+			.put("/b/" + idStringOfMockbin)
 			.send(binToPut);
 
 		const expectedResponse = Object.assign({}, binToPut);
 
 		expect(response.status).toBe(201);
 		expect(response.body).toEqual(expectedResponse);
-	});
 
-	it("Should not create a new bin while updating", async () => {
-		fs.unlinkSync(`./todos/${idOfFileToDelete}.json`);
+		fs.unlinkSync(`./todos/${idStringOfMockbin}.json`);
 		const allBins = fs.readdirSync("./todos");
-		expect(allBins.includes(idOfFileToDelete)).toBe(false);
+		expect(allBins.includes(idStringOfMockbin)).toBe(false);
 	});
 
 	it("Should return an error message with status code 404 for bin not found", async () => {
+		const binIdOf36Chars = "123456789123456789123456789123456789";
 		const response = await supertest(app)
-			.put("/b/" + idOfFileToDelete)
+			.put("/b/" + binIdOf36Chars)
 			.send(binToPut);
 
 		// Is the status code 404
@@ -166,10 +205,30 @@ describe("PUT route", () => {
 });
 
 describe("DELETE route", () => {
-	const idOfFileToDelete = "98396c07-e194-4a86-b2c8-93bb0f69f4bb";
-	const expectedResponse = `Deleted bin id: ${idOfFileToDelete}`;
+	const binToDelete = {
+		"my-todo": [
+			{
+				text: "Get shredded",
+				priority: "3",
+				date: 1613869413218,
+			},
+		],
+		"completed-todos": [
+			{
+				text: "Eat Pizza",
+				priority: "5",
+				date: 1613869400385,
+				dateCompleted: 1613869419824,
+			},
+		],
+	};
 
 	it("Should delete a bin by a given id", async () => {
+		const responsePost = await supertest(app).post("/b").send(binToDelete);
+		const { id } = responsePost.body;
+		idOfFileToDelete = `${id}`;
+		const expectedResponse = `Deleted bin id: ${idOfFileToDelete}`;
+
 		const response = await supertest(app).delete("/b/" + idOfFileToDelete);
 
 		// Is the status code 201
