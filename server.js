@@ -78,10 +78,14 @@ app.post("/b", (req, res) => {
 app.put("/b/:id", (req, res) => {
 	const { id } = req.params;
 	const { body } = req;
+
+	// uuid format is 36 characters long
+	if (id.length !== 36) {
+		res.status(400).json({ message: "Invalid bin id format!" });
+	}
+
 	if (!fs.existsSync(`./todos/${id}.json`)) {
-		res.status(400).json({
-			message: "Bin id to update not found",
-		});
+		res.status(404).json({ message: "Bin not found!" });
 	} else {
 		body.id = id;
 		fs.writeFile(`./todos/${id}.json`, JSON.stringify(body, null, 4), (err) => {

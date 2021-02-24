@@ -1,20 +1,22 @@
+const fs = require("fs");
 const { TestScheduler } = require("jest");
 const supertest = require("supertest");
 const { app } = require("./server.js");
+
+const expectedErrorWithId = {
+	message: "Invalid bin id format!",
+};
+const expectedErrorWithBin = { message: "Bin not found!" };
 
 let idOfFileToDelete;
 
 describe("Test for GET method", () => {
 	const expectedBin = {
-		id: "50300526-3650-4c88-bccb-b59ee62a6529",
+		id: "3254bd50-ca62-450d-9f23-b5df1e11e88e",
 	};
-	const expectedErrorWithId = {
-		message: "Invalid bin id format!",
-	};
-	const expectedErrorWithBin = { message: "Bin not found!" };
 
 	it("Should be able to get a bin by id", async () => {
-		const response = await supertest(app).get("/b/50300526-3650-4c88-bccb-b59ee62a6529");
+		const response = await supertest(app).get("/b/3254bd50-ca62-450d-9f23-b5df1e11e88e");
 		// supertest(app).get("/b:id").expect(200);
 		// Is the status code 200
 		expect(response.status).toBe(200);
@@ -70,6 +72,7 @@ describe("POST route", () => {
 		const response = await supertest(app).post("/b").send(binToPost);
 		const { id } = response.body;
 		idOfFileToDelete = `${id}`;
+		console.log(idOfFileToDelete);
 
 		const expectedResponse = {
 			"my-todo": [
@@ -97,4 +100,67 @@ describe("POST route", () => {
 
 	// it("Should return an error message with status code 400 sending blank bins")
 	// I actually want to be able to POST blank bins
+});
+
+describe("PUT route", () => {
+	let idOfFileToDelete = "39dfcac2-a743-4c54-8810-01cc9193988f";
+	const binToPut = {
+		"my-todo": [
+			{
+				text: "I'm so fucking tired",
+				priority: "1",
+				date: 1613869419824,
+			},
+		],
+		"completed-todos": [
+			{
+				text: "Man this sucks",
+				priority: "5",
+				date: 1613869400385,
+				dateCompleted: 1613869401116,
+			},
+		],
+		id: idOfFileToDelete,
+	};
+
+	it("Should update a bin successfully", async () => {
+		const response = await supertest(app)
+			.put("/b/" + idOfFileToDelete)
+			.send(binToPut);
+
+		const expectedResponse = Object.assign({}, binToPut);
+
+		expect(response.status).toBe(201);
+		expect(response.body).toEqual(expectedResponse);
+	});
+
+	it("Should not create a new bin while updating", async () => {
+		fs.unlinkSync(`./todos/${idOfFileToDelete}.json`);
+		const allBins = fs.readdirSync("./todos");
+		expect(allBins.includes(idOfFileToDelete)).toBe(false);
+	});
+
+	it("Should return an error message with status code 404 for bin not found", async () => {
+		const response = await supertest(app)
+			.put("/b/" + idOfFileToDelete)
+			.send(binToPut);
+
+		// Is the status code 404
+		expect(response.status).toBe(404);
+
+		// Is the body equal expectedBinError
+		expect(response.body).toEqual(expectedErrorWithBin);
+	});
+
+	it("Should return an error message with status code 400 invalid id format", async () => {
+		const response = await supertest(app)
+			.put("/b/" + "12ds-3hg2-s1f2-31s5")
+			.send(binToPut);
+
+		// Is the status code 400
+		expect(response.status).toBe(400);
+
+		// Is the body equal expectedIdError
+		expect(response.body).toEqual(expectedErrorWithId);
+	});
 });
