@@ -164,3 +164,38 @@ describe("PUT route", () => {
 		expect(response.body).toEqual(expectedErrorWithId);
 	});
 });
+
+describe("DELETE route", () => {
+	const idOfFileToDelete = "98396c07-e194-4a86-b2c8-93bb0f69f4bb";
+	const expectedResponse = `Deleted bin id: ${idOfFileToDelete}`;
+
+	it("Should delete a bin by a given id", async () => {
+		const response = await supertest(app).delete("/b/" + idOfFileToDelete);
+
+		// Is the status code 201
+		expect(response.status).toBe(201);
+
+		// Is the body the same as the expected response
+		expect(response.text).toEqual(expectedResponse);
+	});
+
+	it("Should return an error message with status code 400 for invalid id", async () => {
+		const response = await supertest(app).delete("/b/12ds-3hg2-s1f2-31s5");
+
+		// Is the status code 400
+		expect(response.status).toBe(400);
+
+		// Is the body equal expectedIdError
+		expect(response.body).toEqual(expectedErrorWithId);
+	});
+
+	it("Should return an error message with status code 404 for bin not found", async () => {
+		const response = await supertest(app).delete("/b/45e94d13-55c4-470b-b658-8bd01dfd9d24");
+
+		// Is the status code 404
+		expect(response.status).toBe(404);
+
+		// Is the body equal expectedBinError
+		expect(response.body).toEqual(expectedErrorWithBin);
+	});
+});

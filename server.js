@@ -102,10 +102,14 @@ app.put("/b/:id", (req, res) => {
 // DELETE request to /b/{id} delete an object
 app.delete("/b/:id", (req, res) => {
 	const { id } = req.params;
+
+	// uuid format is 36 characters long
+	if (id.length !== 36) {
+		res.status(400).json({ message: "Invalid bin id format!" });
+	}
+
 	if (!fs.existsSync(`./todos/${id}.json`)) {
-		res.status(400).json({
-			message: "Bin id to delete not found",
-		});
+		res.status(404).json({ message: "Bin not found!" });
 	} else {
 		fs.unlink(`./todos/${id}.json`, (err) => {
 			if (err) {
